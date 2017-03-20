@@ -1,0 +1,141 @@
+# Common patterns
+TIMESTAMP_TZ \[%{MONTHDAY}/%{MONTH}/%{YEAR}:%{HOUR}:%{MINUTE}:%{SECOND}\s*%{ISO8601_TIMEZONE}?\]
+
+# Unbind request and it is also reused for other patterns
+OPENDJACESSUNBIND %{TIMESTAMP_TZ:timestamp} %{GREEDYDATA:requestType} conn=%{NUMBER:connID} op=%{NUMBER:opID} msgID=%{NUMBER:messageID}
+
+#GROK PATTERN for Error & Server Logs:-
+
+#------------------------------------------Sample Log Lines Tested for---------------------------
+
+#[28/Sep/2016:09:33:44 +0530] category=PROTOCOL severity=NOTICE msgID=org.opends.messages.protocol.276 msg=Started listening for new connections on Administration Connector 0.0.0.0 port 4444
+
+#[28/Sep/2016:09:33:40 +0530] category=UTIL severity=NOTICE msgID=org.opends.messages.runtime.21 msg=Installation Directory:  /Users/ravi.gupta/DMaverick/pFiles/opendj
+
+#[20/Nov/2016:10:27:57 +0530] category=UTIL severity=NOTICE msgID=org.opends.messages.runtime.19 msg=JVM Arguments: "-Dorg.opends.server.scriptName=start-ds"
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJLOGS}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJLOGS %{TIMESTAMP_TZ:timestamp} category=%{WORD:categoryName} severity=%{WORD:severityLevel} msgID=%{GREEDYDATA:messageID} msg=%{GREEDYDATA:message}
+
+
+#================================================================================================
+
+#GROK PATTERN for Connect Access Logs:-
+
+#------------------------------------------Sample Log Line Tested for----------------------------
+
+#[29/Sep/2016:15:47:53 +0530] CONNECT conn=72 from=127.0.0.1:60395 to=127.0.0.1:1389 protocol=LDAP
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJACESSCONNECT}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJACESSCONNECT %{TIMESTAMP_TZ:timestamp} %{WORD:requestType} conn=%{NUMBER:connID} from=%{IPORHOST:fromIP}:%{NUMBER:fromPort} to=%{IPORHOST:toIP}:%{NUMBER:toPort} protocol=%{WORD:protocolName}
+
+#================================================================================================
+
+#GROK PATTERN for DisConnect Access Logs:-
+
+#------------------------------------------Sample Log Line Tested for----------------------------
+
+#[29/Sep/2016:16:13:34 +0530] DISCONNECT conn=73 reason="Client Disconnect"
+
+#[20/Nov/2016:13:15:56 +0530] DISCONNECT conn=0 reason="Server Error" msg="LDAP Request Handler 0 for connection handler Administration Connector 0.0.0.0 port 4444 was unable to register this client connection with the selector: java.nio.channels.ClosedChannelException"
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJACESSDISCONNECT}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJACESSDISCONNECT %{TIMESTAMP_TZ:timestamp} %{WORD:requestType} conn=%{NUMBER:connID} reason="%{DATA:reason}"(\smsg="%{GREEDYDATA:messageInfo})?
+
+#================================================================================================
+
+#GROK PATTERN for Unbind Req Access Logs:-
+
+#------------------------------------------Sample Log Line Tested for----------------------------
+
+#[28/Sep/2016:15:53:12 +0530] UNBIND REQ conn=37 op=33613 msgID=33614
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJACESSUNBIND}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJACESSUNBIND %{TIMESTAMP_TZ:timestamp} %{GREEDYDATA:requestType} conn=%{NUMBER:connID} op=%{NUMBER:opID} msgID=%{NUMBER:messageID}
+
+#================================================================================================
+
+#GROK PATTERN for BIND REQ Access Logs:-
+
+#------------------------------------------Sample Log Line Tested for----------------------------
+
+#[29/Sep/2016:15:47:53 +0530] BIND REQ conn=72 op=0 msgID=1 version=3 type=SIMPLE dn="cn=Directory Manager"
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJACESSBINDREQ}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJACESSBINDREQ %{OPENDJACESSUNBIND} version=%{NUMBER:versionNumber} type=%{WORD:bindType} dn=%{GREEDYDATA:directoryName}
+
+#================================================================================================
+
+#GROK PATTERN for BIND RES Access Logs:-
+
+#------------------------------------------Sample Log Line Tested for----------------------------
+
+#[29/Sep/2016:15:47:53 +0530] BIND RES conn=72 op=0 msgID=1 result=0 authDN="cn=Directory Manager,cn=Root DNs,cn=config" etime=6
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJACESSBINDRES}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJACESSBINDRES %{OPENDJACESSUNBIND} result=%{NUMBER:result} authDN=%{GREEDYDATA:authDetails} etime=%{NUMBER:eventTime}
+
+#================================================================================================
+
+#GROK PATTERN for SEARCH REQ Access Logs:-
+
+#------------------------------------------Sample Log Line Tested for----------------------------
+
+#[29/Sep/2016:15:47:53 +0530] SEARCH REQ conn=72 op=1 msgID=2 base="dc=rkg,dc=test" scope=sub filter="(objectClass=inetOrgPerson)" attrs="uid"
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJACESSSEARCHREQ}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJACESSSEARCHREQ %{OPENDJACESSUNBIND} base=%{GREEDYDATA:baseInfo} scope=%{GREEDYDATA:scope} filter=%{GREEDYDATA:filterCondition}
+
+#================================================================================================
+
+#GROK PATTERN for SEARCH RES Access Logs:-
+
+#------------------------------------------Sample Log Line Tested for----------------------------
+
+#[29/Sep/2016:15:47:53 +0530] SEARCH RES conn=72 op=1 msgID=2 result=0 nentries=1000 unindexed etime=343
+
+#------------------------------------------Logstash Pattern To Match-----------------------------
+
+#%{OPENDJACESSSEARCHRES}
+
+#------------------------------------------Grok Pattern------------------------------------------
+
+OPENDJACESSSEARCHRES %{OPENDJACESSUNBIND} result=%{NUMBER:result} nentries=%{NUMBER:numberOfEntries} %{RESULTTYPE}\s*etime=%{NUMBER:eventTime}
+RESULTTYPE (%{WORD:resultType})?
+
+#================================================================================================

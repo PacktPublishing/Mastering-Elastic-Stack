@@ -1,0 +1,8 @@
+# MMM dd, yyyy HH:mm:ss eg: Jan 9, 2014 7:13:13 AM
+CATALINA_DATESTAMP %{MONTH} %{MONTHDAY}, %{YEAR} %{HOUR}:?%{MINUTE}(?::?%{SECOND}) (?:AM|PM)
+JAVALOGMESSAGE (.*)
+CATALINALOGMESSAGE %{CATALINA_DATESTAMP:datestamp} %{DATA:class}%{LOGLEVEL:level}:\s* %{JAVALOGMESSAGE:message}
+
+TOMCAT_DATESTAMP %{HOUR}:%{MINUTE}:(%{SECOND}),(%{NUMBER:milliseconds})
+LOGTHREAD  ([A-Za-z0-9_. -]+)
+TOMCAT_LOG %{TOMCAT_DATESTAMP:timestamp} %{LOGLEVEL:level}\s* \[%{LOGTHREAD:logThread}\]\[%{LOGTHREAD:class}:%{INT:line}\]\s*%{GREEDYDATA:message}

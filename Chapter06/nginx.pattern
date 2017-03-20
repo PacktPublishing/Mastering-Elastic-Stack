@@ -1,0 +1,2 @@
+NGUSER [a-zA-Z\.\@\-\+_%]+
+NGINXACCESSLOG %{IPORHOST:clientip} %{NGUSER:user} %{NGUSER:auth} \[%{HTTPDATE:timestamp}\] "%{WORD:verb} %{URIPATHPARAM:request} HTTP/%{NUMBER:httpversion}" %{NUMBER:response} (?:%{NUMBER:bytes}|-) (?:"(?:%{URI:referrer}|-)"|%{QS:referrer}) %{QS:agent}

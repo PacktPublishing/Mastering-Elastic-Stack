@@ -1,0 +1,15 @@
+input:
+  period: 1
+  urls:
+    - http://127.0.0.1:9200/
+  stats:
+    cluster: true
+    nodes: true
+    health: true
+output:
+  elasticsearch:
+    hosts: ["localhost:9200"]
+shipper:
+logging:
+  files:
+    rotateeverybytes: 10485760 # = 10MB

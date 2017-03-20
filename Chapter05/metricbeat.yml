@@ -1,0 +1,28 @@
+metricbeat.modules:
+- module: system
+  metricsets:
+    - cpu
+    - load
+    - core
+    - diskio
+    - filesystem
+    - fsstat
+    - memory
+    - network
+    - process
+  enabled: true
+  period: 10s
+  processes: ['.*']
+
+output.logstash:
+  enabled: true
+  hosts: ["localhost:5044"]
+
+output.console:
+  enabled: true
+  pretty: true
+
+logging.level: info
+logging.to_files: true
+logging.files:
+  rotateeverybytes: 10485760 # = 10MB
