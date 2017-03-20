@@ -14,7 +14,7 @@ All of the code is organized into folders. Each folder starts with a number foll
 
 ## Addational Info
 
-No code for chapter 6 and 7
+The Code files for chapter 1, 7, 9 and 11 are not present since they deal with User Interface more, also provided is the software and the hardware list required for the book
 
 ## Software Hardware Requirements
 
